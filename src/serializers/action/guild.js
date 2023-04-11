@@ -1,7 +1,11 @@
-const {GetActionSerializer, GetOneSerializer, CreateActionSerializer, ConnectToMeSerializer, DisconnectFromMeSerializer, CreateMineSerializer} = require('./base');
+const {GetActionSerializer, GetOneSerializer, ConnectToMeSerializer, DisconnectFromMeSerializer, CreateMineSerializer, GetMineSerializer} = require('./base');
 const Guild = require("../../db/models/Guild");
 const User = require("../../db/models/User");
 const Membership = require("../../db/models/relations/User/Membership");
+
+const Tag = require("../../db/models/Tag");
+const GuildTag = require("../../db/models/relations/tag/GuildTag");
+
 
 class GuildGetSerializer extends GetOneSerializer {
     constructor() {
@@ -65,10 +69,56 @@ class DisconnectGuildFromUserSerializer extends DisconnectFromMeSerializer {
     }
 }
 
+class AddTagSerializer extends ConnectToMeSerializer {
+    constructor(){
+        super();
+        this.model = Tag;
+        this.model_name = 'tag';
+        this.required_fields = ['id_list', 'guild_id'];
+
+        this.relation_model = GuildTag; // relational table between this.model and this.connected_model
+
+        this.connected_model = Guild; // the model being connected aka the 1 in 1-> many or the other many in many->many
+        this.connected_model_name = 'guild';
+        this.connected_model_body_field = 'guild_id'; // in the request body, has the id of the specific model we are connecting
+    }
+}
+
+class RemoveTagSerializer extends DisconnectFromMeSerializer {
+    constructor(){
+        super();
+        this.model = Tag;
+        this.model_name = 'tag';
+        this.required_fields = ['id_list', 'guild_id'];
+
+        this.relation_model = GuildTag; // relational table between this.model and this.connected_model
+
+        this.connected_model = Guild; // the model being connected aka the 1 in 1-> many or the other many in many->many
+        this.connected_model_name = 'guild';
+        this.connected_model_body_field = 'guild_id'; // in the request body, has the id of the specific model we are connecting
+    }
+}
+
+class ListGuildTagsSerializer extends GetMineSerializer {
+    constructor() {
+        super();
+        this.model_name = "tag";
+        this.match_field = "id";
+        this.model = Tag;
+        this.relation_model = GuildTag;
+        this.connected_model = Guild;
+        this.connected_model_body_field = "guild_id";
+        this.connected_model_name = 'guild';
+    }
+};
+
 module.exports = {
     GuildGetSerializer: GuildGetSerializer,
     GuildListSerializer: GuildListSerializer,
     CreateGuildSerializer: CreateGuildSerializer,
     ConnectGuildToUserSerializer: ConnectGuildToUserSerializer,
-    DisconnectGuildFromUserSerializer: DisconnectGuildFromUserSerializer
+    DisconnectGuildFromUserSerializer: DisconnectGuildFromUserSerializer,
+    AddTagSerializer: AddTagSerializer,
+    RemoveTagSerializer: RemoveTagSerializer,
+    ListGuildTagsSerializer: ListGuildTagsSerializer
   };

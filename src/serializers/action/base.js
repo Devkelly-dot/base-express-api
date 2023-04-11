@@ -1,4 +1,7 @@
+const mongoose = require('mongoose');
+
 const {getModelsByField, getModelByField} = require('../../utils/queries');
+
 const User = require("../../db/models/User");
 
 const fake_database = require('../../db/fake_db');
@@ -191,8 +194,10 @@ class GetMineSerializer extends GetActionSerializer {
         this.connected_model_name = null;
 
         this.filter_method = async (req, model)=>{
-            const req_user = req.user;
-            const connectedModelId = req.body[this.connected_model_body_field];
+            console.log(req.body);
+            const id_to_string = req.body[this.connected_model_body_field].toString();
+            const connectedModelId = new mongoose.Types.ObjectId(id_to_string);
+            console.log(connectedModelId);
 
             const pipeline = [
                 {
@@ -218,7 +223,7 @@ class GetMineSerializer extends GetActionSerializer {
             ];
               
             const items = (await this.relation_model.aggregate(pipeline).exec()).map(doc => doc.items);
-            
+
             return {
                 item: items,
                 many: true,
@@ -264,9 +269,9 @@ class CreateMineSerializer extends PostActionSerializer {
             }
 
             const newModel = await this.model.create(new_model);
-            const connectDB = await this.connected_model.findOne({ _id: req.body[this.connected_model_body_field] });
-
+            
             if(this.relation_model!==null){
+                const connectDB = await this.connected_model.findOne({ _id: req.body[this.connected_model_body_field] });
                 const newRelation = await this.relation_model({
                     [this.connected_model_name]: connectDB._id,
                     [this.model_name]: newModel._id

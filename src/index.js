@@ -2,10 +2,11 @@ const express = require('express');
 const { connect, mongoose } = require('./db');
 connect();
 
-const authRoute = require('./routes/auth')
-const userRoute = require('./routes/user')
-const platformRoute = require('./routes/platform')
-const GuildRoute = require('./routes/guild')
+const authRoute = require('./routes/auth');
+const userRoute = require('./routes/user');
+const platformRoute = require('./routes/platform');
+const GuildRoute = require('./routes/guild');
+const TagRoute = require('./routes/tag');
 
 const app = express(); 
 const PORT = 3001; 
@@ -21,5 +22,6 @@ app.use('/api/v1/auth', authRoute);
 app.use('/api/v1/user', userRoute);
 app.use('/api/v1/platform', platformRoute);
 app.use('/api/v1/guild', GuildRoute);
+app.use('/api/v1/tag', TagRoute);
 
 app.listen(PORT, ()=>console.log(`Running Express server on port ${PORT}`));
